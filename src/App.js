@@ -188,7 +188,7 @@ setVelocity=(event)=>{
           return(
             row.map(cell=>{
               return(
-                <div className={`cell 
+                <div key={`${cell.row} ${cell.col}`} className={`cell 
                   ${
                     this.isHead(cell)
                     ?'apple': this.isApple(cell)
