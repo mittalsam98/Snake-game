@@ -31,9 +31,13 @@ constructor(){
     tail:[]
     }
   }
+
 }
 
 componentDidMount=()=>{
+  document.addEventListener('keydown',(e)=>{
+    this.setVelocity(e);
+  })
 setTimeout(()=>{
   this.gameLoop();
 },1000)
@@ -137,8 +141,9 @@ isTail=(cell)=>{
 
 setVelocity=(event)=>{
   if(event.keyCode===38){
-    this.setState((prevState)=>({
+    this.setState(({snake})=>({
       snake:{
+        ...snake,
         velocity:{
           x:0,
            y:-1
@@ -146,8 +151,9 @@ setVelocity=(event)=>{
       }
     }))
   }else if(event.keyCode===40){
-    this.setState((prevState)=>({
+    this.setState(({snake})=>({
       snake:{
+        ...snake,
         velocity:{
           x:0,
           y:1
@@ -155,8 +161,9 @@ setVelocity=(event)=>{
       }
     }))
   }else if(event.keyCode===39){
-    this.setState((prevState)=>({
+    this.setState(({snake})=>({
       snake:{
+        ...snake,
         velocity:{
           x:1,
            y:0
@@ -164,8 +171,9 @@ setVelocity=(event)=>{
       }
     }))
   }else if(event.keyCode===37){
-    this.setState((prevState)=>({
+    this.setState(({snake})=>({
       snake:{
+        ...snake,
         velocity:{
           x:-1,
            y:0
@@ -179,7 +187,7 @@ setVelocity=(event)=>{
     const {grid,snake,gameOver}=this.state;
     // console.log(grid)
   return (
-    <div onKeyPress={this.setVelocity} className="App">
+    <div className="App">
       {
       gameOver?<h1>Game Over! You scored {snake.tail.length+1}</h1>
       :  <section className='grid'>
