@@ -18,10 +18,7 @@ constructor(){
 
   this.state={
     grid,
-    apple:{
-      row:Math.floor(Math.random()*20),
-      col:Math.floor(Math.random()*20)
-    },
+    apple:this.getRandomApple(),
     snake:{
      head:{
       row:9,
@@ -42,27 +39,36 @@ setTimeout(()=>{
 },1000)
 }
 
+getRandomApple=()=>({
+  row:Math.floor(Math.random()*20),
+  col:Math.floor(Math.random()*20)
+})
+
 gameLoop=()=>{
 
   if(this.state.gameOver){
     return;
   }
   
-  this.setState(({snake})=>({ 
-    snake:{
-      ...snake,
-      head:{
-       row: snake.head.row+snake.velocity.y,
-        col:snake.head.col+snake.velocity.x
-     },
-     tail:snake.tail.map(cell=>({
-       row:cell.row+snake.velocity.x,
-       col:cell.col+snake.velocity.y
-     }))
-     },
-  }),()=>{
+  this.setState(({snake,apple})=>{
+    const collidesWithApple=this.collidesWithApple();
+    const nextState={ 
+      snake:{
+        ...snake,
+        head:{
+         row: snake.head.row+snake.velocity.y,
+          col:snake.head.col+snake.velocity.x
+       },
+       tail:[snake.head, ...snake.tail]
+       },
+       apple:collidesWithApple?this.getRandomApple():apple
+    }
 
-    setTimeout(()=>{
+    if(!collidesWithApple) nextState.snake.tail.pop();
+
+    return  nextState;
+  },()=>{
+
 
       if(this.isOffEdge()){
         this.setState({
@@ -71,21 +77,23 @@ gameLoop=()=>{
         return;
       }
 
-      if(this.collidesWithApple()){
-         this.setState(({tail,head})=>{
-           tail.pop();
-           return{
-             snake:{
-               tail:[head,...tail ]
-             },
-             apple:{
-              row:Math.floor(Math.random()*20),
-              col:Math.floor(Math.random()*20)
-             }
-           }
-         })
-      }
+      // if(this.collidesWithApple()){ 
+      //    this.setState(({snake})=>{
+      //      snake.tail.pop();
+      //      return{
+      //        snake:{
+      //          ...snake,
+      //          tail:[snake.head,...snake.tail ]
+      //        },
+      //        apple:{
+      //         row:Math.floor(Math.random()*20),
+      //         col:Math.floor(Math.random()*20)
+      //        }
+      //      }
+      //    })
+      // }
 
+      setTimeout(()=>{
       this.gameLoop()
     },1000)
 
@@ -121,27 +129,73 @@ isHead=(cell)=>{
   return snake.head.row===cell.row && snake.head.col===cell.col
 }
 
+isTail=(cell)=>{
+ const {snake}=this.state;
+ return snake.tail.find(inTails=>inTails.row===cell.row && inTails.col===cell.col)
+
+}
+
+setVelocity=(event)=>{
+  if(event.keyCode===38){
+    this.setState((prevState)=>({
+      snake:{
+        velocity:{
+          x:0,
+           y:-1
+        }
+      }
+    }))
+  }else if(event.keyCode===40){
+    this.setState((prevState)=>({
+      snake:{
+        velocity:{
+          x:0,
+          y:1
+        }
+      }
+    }))
+  }else if(event.keyCode===39){
+    this.setState((prevState)=>({
+      snake:{
+        velocity:{
+          x:1,
+           y:0
+        }
+      }
+    }))
+  }else if(event.keyCode===37){
+    this.setState((prevState)=>({
+      snake:{
+        velocity:{
+          x:-1,
+           y:0
+        }
+      }
+    }))
+  }
+}
+
   render(){
-    const {grid,apple}=this.state;
+    const {grid,snake,gameOver}=this.state;
     // console.log(grid)
   return (
-    <div className="App">
+    <div onKeyPress={this.setVelocity} className="App">
       {
-      this.state.gameOver?<h1>Game Over! You scored {this.state.snake.tail.length+1}</h1>
+      gameOver?<h1>Game Over! You scored {snake.tail.length+1}</h1>
       :  <section className='grid'>
       {
-        this.state.grid.map((row,rowIndex) =>{
+        grid.map((row,rowIndex) =>{
           return(
             row.map(cell=>{
               return(
                 <div className={`cell 
                   ${
-                    this.isApple(cell)
-                    ?'apple': this.isHead(cell)
-                    ?'head':''
+                    this.isHead(cell)
+                    ?'apple': this.isApple(cell)
+                    ?'head': this.isTail(cell)
+                    ?'tail':''
                   }
                 `}></div>
-
               )
             })
           )
