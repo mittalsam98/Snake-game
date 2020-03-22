@@ -38,9 +38,10 @@ componentDidMount=()=>{
   document.addEventListener('keydown',(e)=>{
     this.setVelocity(e);
   })
+  console.log("In component did mount",this.state.snake.tail)
 setTimeout(()=>{
   this.gameLoop();
-},1000)
+},(1000/(this.state.snake.tail.length+1))+200)
 }
 
 getRandomApple=()=>({
@@ -48,6 +49,8 @@ getRandomApple=()=>({
   col:Math.floor(Math.random()*20)
 })
 
+
+////////////////////////////Loop function///////////////////////////
 gameLoop=()=>{
 
   if(this.state.gameOver){
@@ -68,7 +71,10 @@ gameLoop=()=>{
        apple:collidesWithApple?this.getRandomApple():apple
     }
 
-    if(!collidesWithApple) nextState.snake.tail.pop();
+    if(!collidesWithApple) {
+      const sas=nextState.snake.tail.pop();
+      console.log("Tail",nextState.snake.tail)
+      console.log(sas)}
 
     return  nextState;
   },()=>{
@@ -81,31 +87,15 @@ gameLoop=()=>{
         return;
       }
 
-      // if(this.collidesWithApple()){ 
-      //    this.setState(({snake})=>{
-      //      snake.tail.pop();
-      //      return{
-      //        snake:{
-      //          ...snake,
-      //          tail:[snake.head,...snake.tail ]
-      //        },
-      //        apple:{
-      //         row:Math.floor(Math.random()*20),
-      //         col:Math.floor(Math.random()*20)
-      //        }
-      //      }
-      //    })
-      // }
-
       setTimeout(()=>{
       this.gameLoop()
-    },1000)
+    },(1000/(this.state.snake.tail.length+1))+200)
 
   })
 
-  console.log(this.state.snake.head)
 }
 
+////////////////////////////////Functions////////////////////////////////////
 
 isOffEdge=()=>{
   const {snake}=this.state;
@@ -116,9 +106,10 @@ isOffEdge=()=>{
     return true
   }
 }
+
 collidesWithApple=()=>{
   const {apple,snake}=this.state;
-  return apple.col===snake.head.row
+  return apple.row  ===snake.head.row
           && apple.col===snake.head.col ;
 }
 
@@ -135,7 +126,7 @@ isHead=(cell)=>{
 
 isTail=(cell)=>{
  const {snake}=this.state;
- return snake.tail.find(inTails=>inTails.row===cell.row && inTails.col===cell.col)
+ return snake.tail.find(inTail=>inTail.row===cell.row && inTail.col===cell.col)
 
 }
 
@@ -183,9 +174,9 @@ setVelocity=(event)=>{
   }
 }
 
+//////////////////////////////////render///////////////////////////////////
   render(){
     const {grid,snake,gameOver}=this.state;
-    // console.log(grid)
   return (
     <div className="App">
       {
